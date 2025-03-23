@@ -3,6 +3,8 @@ server:
   port:8080
 
 spring:
+  config:
+    import: "optional:file:./config/"  # 优先使用运行jar包目录的config目录下的application.yaml
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: oracle.jdbc.OracleDriver
