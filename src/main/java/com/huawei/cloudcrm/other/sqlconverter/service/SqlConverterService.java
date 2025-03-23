@@ -1,6 +1,7 @@
 package com.huawei.cloudcrm.other.sqlconverter.service;
 
 import com.alibaba.druid.stat.TableStat;
+import com.huawei.cloudcrm.other.sqlconverter.dao.SqlQueryEntity;
 import com.huawei.cloudcrm.other.sqlconverter.parser.DangerousSqlDetector;
 import com.huawei.cloudcrm.other.sqlconverter.parser.DruidSqlParser;
 import org.slf4j.Logger;
@@ -35,44 +36,51 @@ public class SqlConverterService {
     }
 
     public void convertSqlFile(String inputFilePath, String outputFilePath) {
-        List<String> sqlQueries = readSqlFile(inputFilePath);
-        List<String> result = new ArrayList<>();
-        for (String sql : sqlQueries) {
+        List<SqlQueryEntity> sqlQueries = readSqlFile(inputFilePath);
+        for (SqlQueryEntity item : sqlQueries) {
+            String sql = item.getSql();
+            List<String> result = new ArrayList<>();
             // 检测SQL语句是否有效
             if (!DangerousSqlDetector.isValidSql(sql)) {
                 logger.error("检测到无效SQL语句，跳过执行: {}", sql);
-                result.add("检测到无效SQL语句，跳过执行: " + sql);
+                item.setErrMsg("检测到无效SQL语句，跳过执行: " + sql);
                 continue;
             }
             // 检测是否为危险SQL语句
             if (DangerousSqlDetector.isDangerousSql(sql)) {
                 logger.error("检测到危险SQL语句，跳过执行: {}", sql);
-                result.add("检测到危险SQL语句，跳过执行: " + sql);
+                item.setErrMsg("检测到危险SQL语句，跳过执行: " + sql);
                 continue;
             }
             // 检测WHERE条件是否无效
             if (DangerousSqlDetector.isInvalidCondition(sql)) {
                 logger.error("检测到无效的WHERE条件，跳过执行: {}", sql);
-                result.add("检测到无效的WHERE条件，跳过执行: " + sql);
+                item.setErrMsg("检测到无效的WHERE条件，跳过执行: " + sql);
                 continue;
             }
             List<String> insertDeleteStatements = generateInsertDeleteStatements(sql);
             result.addAll(insertDeleteStatements);
+            item.setConverterResult(result);
         }
 
-        writeResultToFile(outputFilePath, result);
+        writeResultToFile(outputFilePath, sqlQueries);
     }
 
-    private List<String> readSqlFile(String filePath) {
-        List<String> sqlQueries = new ArrayList<>();
+    private List<SqlQueryEntity> readSqlFile(String filePath) {
+        List<SqlQueryEntity> sqlQueries = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
+            int lineNum = 0;
             while ((line = br.readLine()) != null) {
+                lineNum++;
+                if (StringUtils.isEmpty(line)) {
+                    continue;
+                }
                 String sqlStr = line.trim();
                 if (sqlStr.endsWith(";")) {
                     sqlStr = sqlStr.substring(0, sqlStr.length() - 1);
                 }
-                sqlQueries.add(sqlStr);
+                sqlQueries.add(new SqlQueryEntity(lineNum + "", sqlStr));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -180,11 +188,15 @@ public class SqlConverterService {
         return sb.toString();
     }
 
-    private void writeResultToFile(String filePath, List<String> result) {
+    private void writeResultToFile(String filePath, List<SqlQueryEntity> result) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
-            for (String line : result) {
-                bw.write(line);
+            for (SqlQueryEntity sqlQueryEntity : result) {
+                bw.write("--第" + sqlQueryEntity.getLineNum() + "行 " + sqlQueryEntity.getErrMsg());
                 bw.newLine();
+                for (String line : sqlQueryEntity.getConverterResult()) {
+                    bw.write(line);
+                    bw.newLine();
+                }
                 bw.newLine();
             }
         } catch (IOException e) {
