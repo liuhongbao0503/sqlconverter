@@ -15,3 +15,14 @@ pagehelper:
   reasonable: true
   support-methods-args: true
   params: count=ROW_NUMBER
+
+
+file:
+  input-dir: "d:/code/input/"          # 输入文件目录
+  output-dir: "d:/code/output/"        # 输出结果目录
+  completed-dir: "d:/code/completed/"  # 已完成文件目录
+
+# 定时任务配置
+task:
+  schedule:
+    fixed-rate: 60000  # 每分钟执行一次

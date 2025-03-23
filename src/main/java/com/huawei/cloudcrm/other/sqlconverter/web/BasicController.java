@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.huawei.cloudcrm.other.sqlconverter.demos.web;
+package com.huawei.cloudcrm.other.sqlconverter.web;
 
 import com.huawei.cloudcrm.other.sqlconverter.service.SqlConverterService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,6 +34,12 @@ public class BasicController {
     @Autowired
     private SqlConverterService sqlConverterService;
 
+    @Value("${file.input-dir}")
+    private String inputFilePath;
+
+    @Value("${file.output-dir}")
+    private String outputFilePath;
+
     // http://127.0.0.1:8080/hello?name=lisi
     @RequestMapping("/hello")
     @ResponseBody
@@ -45,8 +52,6 @@ public class BasicController {
     @ResponseBody
     public User user() {
 
-        String inputFilePath = "d:\\code\\input.sql";
-        String outputFilePath = "d:\\code\\output.sql";
         sqlConverterService.convertSqlFile(inputFilePath, outputFilePath);
         System.out.println("SQL转换完成，结果已写入到 " + outputFilePath);
 

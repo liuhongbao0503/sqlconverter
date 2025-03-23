@@ -3,6 +3,8 @@ package com.huawei.cloudcrm.other.sqlconverter.service;
 import com.alibaba.druid.stat.TableStat;
 import com.huawei.cloudcrm.other.sqlconverter.parser.DangerousSqlDetector;
 import com.huawei.cloudcrm.other.sqlconverter.parser.DruidSqlParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
@@ -23,6 +25,8 @@ import java.util.Set;
 
 @Service
 public class SqlConverterService {
+    private static final Logger logger = LoggerFactory.getLogger(SqlConverterService.class);
+
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -36,19 +40,19 @@ public class SqlConverterService {
         for (String sql : sqlQueries) {
             // 检测SQL语句是否有效
             if (!DangerousSqlDetector.isValidSql(sql)) {
-                System.err.println("检测到无效SQL语句，跳过执行: " + sql);
+                logger.error("检测到无效SQL语句，跳过执行: {}", sql);
                 result.add("检测到无效SQL语句，跳过执行: " + sql);
                 continue;
             }
             // 检测是否为危险SQL语句
             if (DangerousSqlDetector.isDangerousSql(sql)) {
-                System.err.println("检测到危险SQL语句，跳过执行: " + sql);
+                logger.error("检测到危险SQL语句，跳过执行: {}", sql);
                 result.add("检测到危险SQL语句，跳过执行: " + sql);
                 continue;
             }
             // 检测WHERE条件是否无效
             if (DangerousSqlDetector.isInvalidCondition(sql)) {
-                System.err.println("检测到无效的WHERE条件，跳过执行: " + sql);
+                logger.error("检测到无效的WHERE条件，跳过执行: {}", sql);
                 result.add("检测到无效的WHERE条件，跳过执行: " + sql);
                 continue;
             }

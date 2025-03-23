@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.huawei.cloudcrm.other.sqlconverter.demos.web;
+package com.huawei.cloudcrm.other.sqlconverter.web;
 
 /**
  * @author <a href="mailto:chenxilzx1@gmail.com">theonefx</a>

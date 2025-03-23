@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.huawei.cloudcrm.other.sqlconverter.demos.web;
+package com.huawei.cloudcrm.other.sqlconverter.web;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
