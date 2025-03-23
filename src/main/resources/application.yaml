@@ -1,0 +1,17 @@
+# 应用服务 WEB 访问端口
+server:
+  port:8080
+
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: oracle.jdbc.OracleDriver
+    url: jdbc:oracle:thin:@//localhost:1521/orcl
+    username: scott
+    password: 123456
+
+pagehelper:
+  helper-dialect: oracle
+  reasonable: true
+  support-methods-args: true
+  params: count=ROW_NUMBER
